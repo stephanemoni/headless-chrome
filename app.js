@@ -11,9 +11,9 @@ const os = require('os');
 const sTempDirPath = os.tmpdir();
 const sType = 'html';
 // URL params
-var oUrlParams = {}; 
-oUrlParams['cache_lifespan'] = 1200; //1200s cache life span by default
-oUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
+var aUrlParams = []; 
+aUrlParams['cache_lifespan'] = 1200; //1200s cache life span by default
+aUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
 
 var parseUrl = function(url) {
 	url = decodeURIComponent(url)
@@ -80,13 +80,11 @@ app.get('/', function(req, res) {
 
 			await page.waitFor(300);
 
-			//scroll down
-
+			//scroll down with delay
 			await page.evaluate(async () => {
 				window.scrollBy(0, window.document.body.scrollHeight);
 			});
-
-			await page.waitFor(1000);
+			await page.waitFor(global['scrolldown_delay']);
 
 			// now get all the current dom, and close the browser
 			let html = await page.content();
@@ -119,7 +117,7 @@ app.listen(port, function() {
 
 var getRequestCacheName = function(url) {
 	var realUrl;
-	realUrl = removeQueryParam(['cache_lifespan'], url);
+	realUrl = removeQueryParam(['cache_lifespan','scrolldown_delay'], url);
 	//console.log('RealUrl ' + realUrl)
 
 	return require('crypto').createHash('md5').update(realUrl).digest("hex");
@@ -152,7 +150,7 @@ function setCacheDirectory() {
 }
 
 function useFileCache(path) {
-	console.log('cache_lifespan='+global['cache_lifespan']);
+	//console.log('cache_lifespan='+global['cache_lifespan']);
 	if (fs.existsSync(path)) {
 		//file exists
 		var aStats = fs.statSync(path);
@@ -197,8 +195,8 @@ function removeQueryParam(parameters = [], url) {
 		var urlParts = url.split('?');
 		var params = new URLSearchParams(urlParts[1]);
 		parameters.forEach(param => {
-			global[param] = (Number(params.get(param)) > 0) ? params.get(param) : oUrlParams[param];
-			console.log(param+'='+global['cache_lifespan']);
+			global[param] = (Number(params.get(param)) > 0) ? params.get(param) : aUrlParams[param];
+			console.log(param+'='+global[param]);
 			params.delete(param);
 		})
 		return urlParts[0] + '?' + params.toString();
