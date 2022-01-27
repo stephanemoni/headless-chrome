@@ -11,9 +11,9 @@ const os = require('os');
 const sTempDirPath = os.tmpdir();
 const sType = 'html';
 // URL params
-var aUrlParams = []; 
-aUrlParams['cache_lifespan'] = 1200; //1200s cache life span by default
-aUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
+var oUrlParams = {}; 
+oUrlParams['cache_lifespan'] = 1200; //1200s cache life span by default
+oUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
 
 var parseUrl = function(url) {
 	url = decodeURIComponent(url)
@@ -117,7 +117,7 @@ app.listen(port, function() {
 
 var getRequestCacheName = function(url) {
 	var realUrl;
-	realUrl = removeQueryParam(['cache_lifespan','scrolldown_delay'], url);
+	realUrl = removeQueryParam(Object.keys(oUrlParams), url);
 	//console.log('RealUrl ' + realUrl)
 
 	return require('crypto').createHash('md5').update(realUrl).digest("hex");
@@ -195,7 +195,7 @@ function removeQueryParam(parameters = [], url) {
 		var urlParts = url.split('?');
 		var params = new URLSearchParams(urlParts[1]);
 		parameters.forEach(param => {
-			global[param] = (Number(params.get(param)) > 0) ? params.get(param) : aUrlParams[param];
+			global[param] = (Number(params.get(param)) > 0) ? Number(params.get(param)) : oUrlParams[param];
 			console.log(param+'='+global[param]);
 			params.delete(param);
 		})
