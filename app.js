@@ -11,7 +11,9 @@ const os = require('os');
 const sTempDirPath = os.tmpdir();
 const sType = 'html';
 // URL params
-var cache_lifespan; //1200s cache life span by default
+var oUrlParams = {}; 
+oUrlParams['cache_lifespan'] = 1200; //1200s cache life span by default
+oUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
 
 var parseUrl = function(url) {
 	url = decodeURIComponent(url)
@@ -23,7 +25,7 @@ var parseUrl = function(url) {
 };
 
 app.get('/', function(req, res) {
-	var urlToScrape = parseUrl(req.query.url); //URL+cache_lifespan+delay
+	var urlToScrape = parseUrl(req.query.url); //URL+cache_lifespan+scrolldown_delay
 
 	// Check cache
 	var sCacheDirPathToday = setCacheDirectory();
@@ -116,7 +118,6 @@ app.listen(port, function() {
 })
 
 var getRequestCacheName = function(url) {
-	var cache_lifespan;
 	var realUrl;
 	realUrl = removeQueryParam(['cache_lifespan'], url);
 	//console.log('RealUrl ' + realUrl)
@@ -151,11 +152,12 @@ function setCacheDirectory() {
 }
 
 function useFileCache(path) {
+	console.log('cache_lifespan='+global['cache_lifespan']);
 	if (fs.existsSync(path)) {
 		//file exists
 		var aStats = fs.statSync(path);
 		var iModifiedTime = Number(aStats.mtime);
-		if ((iModifiedTime + Number(1000 * cache_lifespan)) > new Date().getTime()) {
+		if ((iModifiedTime + Number(1000 * global['cache_lifespan'])) > new Date().getTime()) {
 			return true;
 		}
 	}
@@ -175,7 +177,6 @@ const removeDir = function(path) {
 
 
 var getSubDirPaths = function(sDirPath, aExcludeName = '') {
-	//var aDirs = array_filter( glob( "{$sDirPath}/*" ), 'is_dir' );
 	const aFormat = source => fs.readdirSync(source, {
 		withFileTypes: true
 	}).reduce((a, c) => {
@@ -196,8 +197,8 @@ function removeQueryParam(parameters = [], url) {
 		var urlParts = url.split('?');
 		var params = new URLSearchParams(urlParts[1]);
 		parameters.forEach(param => {
-			cache_lifespan = (Number(params.get(param)) > 0) ? params.get(param) : 1200;
-			//console.log('cache_lifespan='+params.get(param));
+			global[param] = (Number(params.get(param)) > 0) ? params.get(param) : oUrlParams[param];
+			console.log(param+'='+global['cache_lifespan']);
 			params.delete(param);
 		})
 		return urlParts[0] + '?' + params.toString();
