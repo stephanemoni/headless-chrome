@@ -196,7 +196,7 @@ function removeQueryParam(parameters = [], url) {
 		var params = new URLSearchParams(urlParts[1]);
 		parameters.forEach(param => {
 			global[param] = (Number(params.get(param)) > 0) ? Number(params.get(param)) : oUrlParams[param];
-			console.log(param+'='+global[param]);
+			//console.log(param+'='+global[param]);
 			params.delete(param);
 		})
 		return urlParts[0] + '?' + params.toString();
