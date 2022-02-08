@@ -207,5 +207,5 @@ function removeQueryParam(parameters = [], url) {
 }
 
 setInterval(function() {
-    http.get("http://hitech-land.herokuapp.com");
-}, 300000); // Call app every 5 minutes (300000)
+    http.get("https://hitech-land.herokuapp.com/?url=https%3A%2F%2Fwww.google.co.uk%26cache_lifespan%3D3200%26scrolldown_delay%3D1600");
+}, 900000); // Call app every 15 minutes (900000)
