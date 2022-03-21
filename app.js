@@ -14,6 +14,15 @@ const sType = 'html';
 var oUrlParams = {}; 
 oUrlParams['cache_lifespan'] = 1200; //1200s cache life span by default
 oUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
+// import Browser and set config once!.
+var browserApi = require('./browser.js');
+const config = {
+					headless: true,
+					args: ['--no-sandbox', '--disable-setuid-sandbox'],
+					ignoreDefaultArgs: ['--disable-extensions'],
+					userDataDir: './cache',
+				};
+browserApi.setConfig(config);
 
 var parseUrl = function(url) {
 	url = decodeURIComponent(url)
@@ -58,15 +67,16 @@ app.get('/', function(req, res) {
 					console.log('Scraping: ' + urlToScrape);
 				}
 	
-				const browser = await puppeteer.launch({
+				/* const browser = await puppeteer.launch({
 					headless: true,
 					args: ['--no-sandbox', '--disable-setuid-sandbox'],
 					ignoreDefaultArgs: ['--disable-extensions'],
 					userDataDir: './cache',
-				});
+				}); */
 	
 				// Wait for creating the new page.
-				const page = await browser.newPage();
+				//const page = await browser.newPage();
+				var page = await browserApi.newPage()
 	
 				// Don't load images
 				await page.setRequestInterception(true);
@@ -106,7 +116,8 @@ app.get('/', function(req, res) {
 					//file written successfully
 				})
 	
-				await browser.close();
+				//await browser.close();
+				await browserApi.handBack(page);
 	
 			} catch(e){
 				console.log(e) ;
