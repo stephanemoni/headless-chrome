@@ -37,72 +37,79 @@ app.get('/', function(req, res) {
 	if (validUrl.isWebUri(urlToScrape)) {
 
 		(async () => {
-
-			// Use cache
-			const bFileCached = useFileCache(sFilePath);
-			//console.log('Cache returned?: ' + bFileCached);
-
-			if (bFileCached) {
-				console.log('Caching: ' + urlToScrape);
-				await fs.readFile(sFilePath, 'utf-8', (err, html) => {
+			
+			try{
+				// Use cache
+				const bFileCached = useFileCache(sFilePath);
+				//console.log('Cache returned?: ' + bFileCached);
+	
+				if (bFileCached) {
+					console.log('Caching: ' + urlToScrape);
+					await fs.readFile(sFilePath, 'utf-8', (err, html) => {
+						if (err) {
+							console.error(err);
+							return;
+						}
+						res.send(html);
+					});
+	
+					return;
+				} else {
+					console.log('Scraping: ' + urlToScrape);
+				}
+	
+				const browser = await puppeteer.launch({
+					args: ['--no-sandbox', '--disable-setuid-sandbox'],
+					ignoreDefaultArgs: ['--disable-extensions'],
+					userDataDir: './cache',
+				});
+	
+				// Wait for creating the new page.
+				const page = await browser.newPage();
+	
+				// Don't load images
+				await page.setRequestInterception(true);
+				page.on('request', request => {
+					if (request.resourceType() === 'image')
+						request.abort();
+					else
+						request.continue();
+				});
+	
+				// go to the page and wait for it to finish loading
+				await page.goto(urlToScrape, {
+					'waitUntil': 'load'
+				});
+	
+				await page.waitFor(300);
+	
+				//scroll down with delay
+				await page.evaluate(async () => {
+					window.scrollBy(0, window.document.body.scrollHeight);
+				});
+				await page.waitFor(global['scrolldown_delay']);
+	
+				// now get all the current dom, and close the browser
+				let html = await page.content();
+	
+				//let bodyHTML = await page.evaluate(() =>  document.documentElement.outerHTML);
+	
+				res.send(html);
+	
+				// Caching
+				await fs.writeFile(path.join(sFilePath), html, err => {
 					if (err) {
 						console.error(err);
 						return;
 					}
-					res.send(html);
-				});
-
-				return;
-			} else {
-				console.log('Scraping: ' + urlToScrape);
+					//file written successfully
+				})
+	
+				await browser.close();
+	
+			} catch(e){
+				console.log(e) ;
 			}
-
-			const browser = await puppeteer.launch({
-				args: ['--no-sandbox', '--disable-setuid-sandbox']
-			});
-
-			// Wait for creating the new page.
-			const page = await browser.newPage();
-
-			// Don't load images
-			await page.setRequestInterception(true);
-			page.on('request', request => {
-				if (request.resourceType() === 'image')
-					request.abort();
-				else
-					request.continue();
-			});
-
-			// go to the page and wait for it to finish loading
-			await page.goto(urlToScrape, {
-				'waitUntil': 'load'
-			});
-
-			await page.waitFor(300);
-
-			//scroll down with delay
-			await page.evaluate(async () => {
-				window.scrollBy(0, window.document.body.scrollHeight);
-			});
-			await page.waitFor(global['scrolldown_delay']);
-
-			// now get all the current dom, and close the browser
-			let html = await page.content();
-
-			//let bodyHTML = await page.evaluate(() =>  document.documentElement.outerHTML);
-
-			res.send(html);
-
-			// Caching
-			await fs.writeFile(path.join(sFilePath), html, err => {
-				if (err) {
-					console.error(err);
-					return;
-				}
-				//file written successfully
-			})
-
-			await browser.close();
 
 		})();
 	} else {
