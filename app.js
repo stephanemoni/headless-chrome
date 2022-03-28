@@ -20,7 +20,6 @@ const config = {
 					headless: true,
 					args: ['--no-sandbox', '--disable-setuid-sandbox'],
 					ignoreDefaultArgs: ['--disable-extensions'],
-					userDataDir: './cache',
 				};
 browserApi.setConfig(config);
 
