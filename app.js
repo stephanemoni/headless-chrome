@@ -18,7 +18,7 @@ oUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
 var browserApi = require('./browser.js');
 const config = {
 					headless: true,
-					args: ['--no-sandbox', '--disable-setuid-sandbox'],
+					args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
 					ignoreDefaultArgs: ['--disable-extensions'],
 				};
 browserApi.setConfig(config);
@@ -66,16 +66,11 @@ app.get('/', function(req, res) {
 					console.log('Scraping: ' + urlToScrape);
 				}
 	
-				/* const browser = await puppeteer.launch({
-					headless: true,
-					args: ['--no-sandbox', '--disable-setuid-sandbox'],
-					ignoreDefaultArgs: ['--disable-extensions'],
-					userDataDir: './cache',
-				}); */
-	
 				// Wait for creating the new page.
-				//const page = await browser.newPage();
 				var page = await browserApi.newPage()
+				
+				// Configure the navigation timeout
+				await page.setDefaultNavigationTimeout(0);
 	
 				// Don't load images
 				await page.setRequestInterception(true);
@@ -88,7 +83,7 @@ app.get('/', function(req, res) {
 	
 				// go to the page and wait for it to finish loading
 				await page.goto(urlToScrape, {
-					'waitUntil': 'load'
+					waitUntil: 'load'
 				});
 	
 				await page.waitFor(300);
@@ -115,7 +110,7 @@ app.get('/', function(req, res) {
 					//file written successfully
 				})
 	
-				//await browser.close();
+				// Close page
 				await browserApi.handBack(page);
 	
 			} catch(e){
@@ -128,6 +123,8 @@ app.get('/', function(req, res) {
 	}
 
 });
+
+process.setMaxListeners(0);
 
 app.listen(port, function() {
 	console.log('App listening on port ' + port)

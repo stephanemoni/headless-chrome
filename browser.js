@@ -12,35 +12,56 @@ class PuppeteerApi {
     }
 
     async newBrowser() {
-        return await puppeteer.launch(this.config);
+		try {
+			return await puppeteer.launch(this.config);
+		} catch(e){
+			console.log(e) ;
+		}
     }
 
     async getBrowser() {
+		try {
+			if (!this.browser) {
+				console.log('Puppeteer browser launched');
+				this.browser = false;
+				this.browser = await this.newBrowser();
+			}
 
-        if (!this.browser) {
-            this.browser = await this.newBrowser();
-        }
-
-        return this.browser;
+			return this.browser;
+		} catch(e){
+			console.log(e) ;
+		}
     }
 
     async newPage() {
-        const browser = await this.getBrowser();
-        const page = await browser.newPage();
-        return page;
+		try {
+			const browser = await this.getBrowser();
+			const page = await browser.newPage();
+			return page;
+		} catch(e){
+			console.log(e) ;
+		}
     }
 
     async handBack(page) {
+		try {
+			// close the page or even reuse it?.
+			await page.close();
 
-        // close the page or even reuse it?.
-        await page.close();
-
-        // you could add logic for closing the whole browser instance depending what
-        // you want.
+			// you could add logic for closing the whole browser instance depending what
+			// you want.
+		} catch(e){
+			console.log(e) ;
+		}
     }
 
     async shutdown() {
-        await this.browser.close();
+		try {
+			console.log('Puppeteer browser closed');
+			await this.browser.close();
+		} catch(e){
+			console.log(e) ;
+		}
     }
 
 
