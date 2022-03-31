@@ -14,14 +14,6 @@ const sType = 'html';
 var oUrlParams = {}; 
 oUrlParams['cache_lifespan'] = 1200; //1200s cache life span by default
 oUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
-// import Browser and set config once!.
-var browserApi = require('./browser.js');
-const config = {
-					headless: true,
-					args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
-					ignoreDefaultArgs: ['--disable-extensions'],
-				};
-browserApi.setConfig(config);
 
 var parseUrl = function(url) {
 	url = decodeURIComponent(url)
@@ -65,6 +57,15 @@ app.get('/', function(req, res) {
 				} else {
 					console.log('Scraping: ' + urlToScrape);
 				}
+				
+				// import Browser and set config once!.
+				var browserApi = require('./browser.js');
+				const config = {
+									headless: true,
+									args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+									ignoreDefaultArgs: ['--disable-extensions'],
+								};
+				browserApi.setConfig(config);
 	
 				// Wait for creating the new page.
 				var page = await browserApi.newPage()
