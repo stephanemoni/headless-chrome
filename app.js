@@ -14,6 +14,7 @@ const sType = 'html';
 var oUrlParams = {}; 
 oUrlParams['cache_lifespan'] = 1200; //1200s cache life span by default
 oUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
+oUrlParams['proxy_server'] = ''; //no proxy server by default
 
 var parseUrl = function(url) {
 	url = decodeURIComponent(url)
@@ -60,9 +61,11 @@ app.get('/', function(req, res) {
 				
 				// import Browser and set config once!.
 				var browserApi = require('./browser.js');
+				var browserArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'];
+				if (global['proxy_server'] && global['proxy_server'].length > 0) browserArgs.push('--proxy-server='+global['proxy_server']);
 				const config = {
 									headless: true,
-									args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'],
+									args: browserArgs,
 									ignoreDefaultArgs: ['--disable-extensions'],
 								};
 				browserApi.setConfig(config);
@@ -93,7 +96,7 @@ app.get('/', function(req, res) {
 				await page.evaluate(async () => {
 					window.scrollBy(0, window.document.body.scrollHeight);
 				});
-				await page.waitFor(global['scrolldown_delay']);
+				await page.waitFor(Number(global['scrolldown_delay']));
 	
 				// now get all the current dom, and close the browser
 				let html = await page.content();
@@ -211,7 +214,7 @@ function removeQueryParam(parameters = [], url) {
 		var urlParts = url.split('?');
 		var params = new URLSearchParams(urlParts[1]);
 		parameters.forEach(param => {
-			global[param] = (Number(params.get(param)) > 0) ? Number(params.get(param)) : oUrlParams[param];
+			global[param] = (params.get(param) && params.get(param).length > 0) ? params.get(param) : oUrlParams[param];
 			//console.log(param+'='+global[param]);
 			params.delete(param);
 		})

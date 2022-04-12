@@ -3,11 +3,18 @@ var puppeteer = require('puppeteer');
 class PuppeteerApi {
 
     browser = null
+	flagSameConfig = false
     constructor(config) {
         this.config = config;
     }
     
-    setConfig(config) {
+    setConfig(config) {		
+		if (config.length == this.config.length && JSON.stringify(config) === JSON.stringify(this.config) ) {
+			this.flagSameConfig = true;
+		} else {
+			this.flagSameConfig = false;
+		}
+		
         this.config = config;
     }
 
@@ -21,7 +28,7 @@ class PuppeteerApi {
 
     async getBrowser() {
 		try {
-			if (!this.browser) {
+			if (!this.browser || !this.flagSameConfig) {
 				console.log('Puppeteer browser launched');
 				this.browser = false;
 				this.browser = await this.newBrowser();
