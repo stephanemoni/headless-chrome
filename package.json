@@ -8,6 +8,7 @@
   "main": "app.js",
   "dependencies": {
     "express": "^4.16.2",
+    "proxy-chain": "^1.0.4",
     "puppeteer": "^1.13.0",
     "valid-url": "^1.0.9"
   },

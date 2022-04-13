@@ -62,7 +62,12 @@ app.get('/', function(req, res) {
 				// import Browser and set config once!.
 				var browserApi = require('./browser.js');
 				var browserArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'];
-				if (global['proxy_server'] && global['proxy_server'].length > 0) browserArgs.push('--proxy-server='+global['proxy_server']);
+				if (global['proxy_server'] && global['proxy_server'].length > 0) {
+					const proxyChain = require('proxy-chain');
+					const oldProxyUrl = global['proxy_server'];
+					const newProxyUrl = await proxyChain.anonymizeProxy(oldProxyUrl);
+					browserArgs.push('--proxy-server='+newProxyUrl);
+				}
 				const config = {
 									headless: true,
 									args: browserArgs,
@@ -79,7 +84,7 @@ app.get('/', function(req, res) {
 				// Don't load images
 				await page.setRequestInterception(true);
 				page.on('request', request => {
-					if (request.resourceType() === 'image')
+					if (['image', 'stylesheet', 'font'].indexOf(request.resourceType()) !== -1)
 						request.abort();
 					else
 						request.continue();
