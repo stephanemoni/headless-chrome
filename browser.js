@@ -29,9 +29,10 @@ class PuppeteerApi {
     async getBrowser() {
 		try {
 			if (!this.browser || !this.flagSameConfig) {
-				console.log('Puppeteer browser launched');
 				this.browser = false;
 				this.browser = await this.newBrowser();
+				this.browser.on('disconnected', this.getBrowser);
+				console.log('Puppeteer browser launched with pid ' + this.browser.process().pid);
 			}
 
 			return this.browser;
