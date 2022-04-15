@@ -46,7 +46,7 @@ app.get('/', function(req, res) {
 				const bFileCached = useFileCache(sFilePath);
 				//console.log('Cache returned?: ' + bFileCached);
 	
-				if (bFileCached && global['use_cache'] === 'true') {
+				if (bFileCached) {
 					console.log('Caching: ' + urlToScrape);
 					await fs.readFile(sFilePath, 'utf-8', (err, html) => {
 						if (err) {
