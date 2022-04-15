@@ -7,6 +7,7 @@ const http = require('http');
 const path = require('path');
 const fs = require('fs');
 const os = require('os');
+const useProxy = require('puppeteer-page-proxy');
 // File cache variables
 const sTempDirPath = os.tmpdir();
 const sType = 'html';
@@ -15,6 +16,7 @@ var oUrlParams = {};
 oUrlParams['cache_lifespan'] = 1200; //1200s cache life span by default
 oUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
 oUrlParams['proxy_server'] = ''; //no proxy server by default
+oUrlParams['use_cache'] = true; //use cache by default
 
 var parseUrl = function(url) {
 	url = decodeURIComponent(url)
@@ -44,7 +46,7 @@ app.get('/', function(req, res) {
 				const bFileCached = useFileCache(sFilePath);
 				//console.log('Cache returned?: ' + bFileCached);
 	
-				if (bFileCached) {
+				if (bFileCached && global['use_cache'] === 'true') {
 					console.log('Caching: ' + urlToScrape);
 					await fs.readFile(sFilePath, 'utf-8', (err, html) => {
 						if (err) {
@@ -62,7 +64,7 @@ app.get('/', function(req, res) {
 				// import Browser and set config once!.
 				var browserApi = require('./browser.js');
 				var browserArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu'];
-				if (global['proxy_server'] && global['proxy_server'].length > 0) {
+				if (global['proxy_server'] && global['proxy_server'].length > 0 && false) {
 					const proxyChain = require('proxy-chain');
 					const oldProxyUrl = global['proxy_server'];
 					const newProxyUrl = await proxyChain.anonymizeProxy(oldProxyUrl);
@@ -78,30 +80,39 @@ app.get('/', function(req, res) {
 				// Wait for creating the new page.
 				var page = await browserApi.newPage()
 				
+				// Proxy used?
+				if (global['proxy_server'] && global['proxy_server'].length > 0) {
+					await useProxy(page, global['proxy_server']);
+				}
+				
 				// Configure the navigation timeout
 				await page.setDefaultNavigationTimeout(0);
 	
-				// Don't load images
+				// Request interception
+				/* page.removeAllListeners("request");
 				await page.setRequestInterception(true);
-				page.on('request', request => {
-					if (['image', 'stylesheet', 'font'].indexOf(request.resourceType()) !== -1)
-						request.abort();
-					else
-						request.continue();
+				page.on('request', async req => {
+					['image','stylesheet', 'font'].includes(req.resourceType()) ? await req.abort() : await req.continue();
+				}); */
+				
+				// Proxy used?
+				useProxy.lookup(page).then(data => {
+					if (global['proxy_server'] && global['proxy_server'].length > 0) console.log("Proxy IP address:"+data.ip);
+					else console.log("IP address:"+data.ip);
 				});
-	
+
 				// go to the page and wait for it to finish loading
 				await page.goto(urlToScrape, {
 					waitUntil: 'load'
 				});
 	
-				await page.waitFor(300);
+				await page.waitForTimeout(300);
 	
 				//scroll down with delay
 				await page.evaluate(async () => {
 					window.scrollBy(0, window.document.body.scrollHeight);
 				});
-				await page.waitFor(Number(global['scrolldown_delay']));
+				await page.waitForTimeout(Number(global['scrolldown_delay']));
 	
 				// now get all the current dom, and close the browser
 				let html = await page.content();

@@ -33,7 +33,7 @@ class PuppeteerApi {
 				this.browser = await this.newBrowser();
 				this.browser.on('disconnected', this.getBrowser);
 				console.log('Puppeteer browser launched with pid ' + this.browser.process().pid);
-			}
+			} 
 
 			return this.browser;
 		} catch(e){
@@ -65,7 +65,7 @@ class PuppeteerApi {
 
     async shutdown() {
 		try {
-			console.log('Puppeteer browser closed');
+			console.log('Closing Puppeteer browser with pid ' + this.browser.process().pid);
 			await this.browser.close();
 		} catch(e){
 			console.log(e) ;

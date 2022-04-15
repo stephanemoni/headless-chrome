@@ -8,8 +8,8 @@
   "main": "app.js",
   "dependencies": {
     "express": "^4.16.2",
-    "proxy-chain": "^1.0.4",
-    "puppeteer": "^1.13.0",
+    "puppeteer": "^13.5.2",
+    "puppeteer-page-proxy": "github:stephanemoni/puppeteer-proxy",
     "valid-url": "^1.0.9"
   },
   "devDependencies": {},
