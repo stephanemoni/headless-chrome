@@ -14,6 +14,7 @@ const sType = 'html';
 // URL params
 var oUrlParams = {}; 
 oUrlParams['cache_lifespan'] = 1200; //1200s cache life span by default
+oUrlParams['page_timeout'] = 500; //500ms page load time out by default
 oUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
 oUrlParams['proxy_server'] = ''; //no proxy server by default
 oUrlParams['use_cache'] = true; //use cache by default
@@ -28,7 +29,7 @@ var parseUrl = function(url) {
 };
 
 app.get('/', function(req, res) {
-	var urlToScrape = parseUrl(req.query.url); //URL+cache_lifespan+scrolldown_delay
+	var urlToScrape = parseUrl(req.query.url); //URL+cache_lifespan+page_timeout+scrolldown_delay
 
 	// Check cache
 	var sCacheDirPathToday = setCacheDirectory();
@@ -106,7 +107,7 @@ app.get('/', function(req, res) {
 					waitUntil: 'load'
 				});
 	
-				await page.waitForTimeout(300);
+				await page.waitForTimeout(Number(global['page_timeout']));
 	
 				//scroll down with delay
 				await page.evaluate(async () => {
