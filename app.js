@@ -97,9 +97,11 @@ app.get('/', function(req, res) {
 				}); */
 				
 				// Proxy used?
+				let ipAddress;
 				useProxy.lookup(page).then(data => {
-					if (global['proxy_server'] && global['proxy_server'].length > 0) console.log("Proxy IP address:"+data.ip);
-					else console.log("IP address:"+data.ip);
+					ipAddress = data.ip;
+					if (global['proxy_server'] && global['proxy_server'].length > 0) console.log("Proxy IP address:"+ipAddress);
+					else console.log("IP address:"+ipAddress);
 				});
 
 				// go to the page and wait for it to finish loading
@@ -115,10 +117,16 @@ app.get('/', function(req, res) {
 				});
 				await page.waitForTimeout(Number(global['scrolldown_delay']));
 	
+				await page.evaluate((myIpAddress) =>  {
+					const el = document.createElement("field");
+					el.setAttribute("id","web-scraper-ip");
+					el.setAttribute("value",myIpAddress);
+					document.body.appendChild(el);
+					//document.documentElement.outerHTML;
+				}, ipAddress);
+				
 				// now get all the current dom, and close the browser
 				let html = await page.content();
-	
-				//let bodyHTML = await page.evaluate(() =>  document.documentElement.outerHTML);
 	
 				res.send(html);
 	
