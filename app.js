@@ -17,7 +17,7 @@ oUrlParams['cache_lifespan'] = 1200; //1200s cache life span by default
 oUrlParams['page_timeout'] = 500; //500ms page load time out by default
 oUrlParams['scrolldown_delay'] = 1000; //1000ms scroll down time out by default
 oUrlParams['proxy_server'] = ''; //no proxy server by default
-oUrlParams['use_cache'] = true; //use cache by default
+oUrlParams['clear_cache'] = false; //use cache by default
 
 var parseUrl = function(url) {
 	url = decodeURIComponent(url)
@@ -194,12 +194,12 @@ function setCacheDirectory() {
 }
 
 function useFileCache(path) {
-	//console.log('cache_lifespan='+global['cache_lifespan']);
+	//console.log('clear_cache='+global['clear_cache']);
 	if (fs.existsSync(path)) {
 		//file exists
 		var aStats = fs.statSync(path);
 		var iModifiedTime = Number(aStats.mtime);
-		if ((iModifiedTime + Number(1000 * global['cache_lifespan'])) > new Date().getTime()) {
+		if ((iModifiedTime + Number(1000 * global['cache_lifespan'])) > new Date().getTime() && !global['clear_cache']) {
 			return true;
 		}
 	}
