@@ -20,7 +20,7 @@ oUrlParams['proxy_server'] = ''; //no proxy server by default
 oUrlParams['clear_cache'] = false; //use cache by default
 
 var parseUrl = function(url) {
-	url = decodeURIComponent(url)
+	//url = decodeURIComponent(url)
 	if (!/^(?:f|ht)tps?\:\/\//.test(url)) {
 		url = 'http://' + url;
 	}
@@ -37,6 +37,8 @@ app.get('/', function(req, res) {
 	var sFilePath = path.join(sCacheDirPathToday, sFileBaseName);
 
 	console.log('Cache path: ' + sFilePath);
+	//console.log('URL to scrape (not parsed): ' + req.query.url);
+	//console.log('URL to scrape (parsed): ' + urlToScrape);
 
 	if (validUrl.isWebUri(urlToScrape)) {
 
@@ -148,6 +150,7 @@ app.get('/', function(req, res) {
 
 		})();
 	} else {
+		console.log('Invalid url: ' + urlToScrape) ;
 		res.send('Invalid url: ' + urlToScrape);
 	}
 
