@@ -150,7 +150,7 @@ app.get('/', function(req, res) {
 
 		})();
 	} else {
-		console.log('Invalid url: ' + urlToScrape);
+		console.log('Invalid url: ' + urlToScrape) ;
 		res.send('Invalid url: ' + urlToScrape);
 	}
 
