@@ -115,8 +115,20 @@ app.get('/', function(req, res) {
 	
 				//scroll down with delay
 				await page.evaluate(async () => {
-					window.scrollBy(0, window.document.body.scrollHeight);
+					//window.scrollBy(0, window.document.body.scrollHeight);
 				});
+				await page.evaluate(() => new Promise((resolve) => {
+				  var scrollTop = -1;
+				  const interval = setInterval(() => {
+					window.scrollBy(0, 100);
+					if(document.documentElement.scrollTop !== scrollTop) {
+					  scrollTop = document.documentElement.scrollTop;
+					  return;
+					}
+					clearInterval(interval);
+					resolve();
+				  }, 10);
+				}));
 				await page.waitForTimeout(Number(global['scrolldown_delay']));
 	
 				await page.evaluate((myIpAddress) =>  {
