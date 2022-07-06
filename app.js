@@ -66,7 +66,7 @@ app.get('/', function(req, res) {
 				
 				// import Browser and set config once!.
 				var browserApi = require('./browser.js');
-				var browserArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--disable-web-security'];
+				var browserArgs = ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage', '--disable-gpu', '--disable-web-security', '--lang=en-GB'];
 				if (global['proxy_server'] && global['proxy_server'].length > 0 && false) {
 					const proxyChain = require('proxy-chain');
 					const oldProxyUrl = global['proxy_server'];
