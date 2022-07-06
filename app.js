@@ -105,6 +105,11 @@ app.get('/', function(req, res) {
 					if (global['proxy_server'] && global['proxy_server'].length > 0) console.log("Proxy IP address:"+ipAddress);
 					else console.log("IP address:"+ipAddress);
 				});
+				
+				// add extra headers
+				await page.setExtraHTTPHeaders({
+					'Accept-Language': 'en-GB'
+				});
 
 				// go to the page and wait for it to finish loading
 				await page.goto(urlToScrape, {
